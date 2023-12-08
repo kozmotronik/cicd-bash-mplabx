@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+
+precommitBaslik="$urtotm_dialogBaslik - pre-commit"
+if command -v tersara &> /dev/null; then
+	# TODO Unity testi için yapılandır
+# 	gradlew=$(tersara -f gradlew -l 7)
+	echo "Test çalışıyor"
+	testSonucu=$?
+	echo Test sonucu $testSonucu
+	exit $testSonucu
+else
+	mesajGoster hata "$precommitBaslik" "'tersara' betiği '$PATH' yollarında bulunamadığından pre-commit kancası iptal oldu."
+	exit 1
+fi

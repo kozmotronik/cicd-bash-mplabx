@@ -1,0 +1,10 @@
+#!/bin/bash
+
+postcommitBaslik="$urtotm_dialogBaslik - post-commit"
+if command -v goruntu >& /dev/null; then
+    goruntu "$(basename -- "$0")"
+else
+    mesajGoster hata "$postcommitBaslik" "'goruntu' betiği '$PATH' yollarında \
+        bulunamadığından post-commit kancası iptal oldu."
+fi
+

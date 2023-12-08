@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# TODO yayınla için test yaz
+# Çevre değişkenleri
+export PATH="$PATH:${HOME}/.bin/urtotm-araclar:/disk/Projeler/Kabuk-Shell/uretim-otomasyonu/mplabx/"
+export urtotm_calismaDizini="/disk/Projeler/Kabuk-Shell/uretim-otomasyonu/mplabx/test"
+export urtotm_projeDizini="/disk/Projeler/Kabuk-Shell/uretim-otomasyonu/mplabx/test/mplab-proje.X"
+export urtotm_yedekDizini="/disk/Projeler/Kabuk-Shell/uretim-otomasyonu/mplabx/test/yedekler"
+export urtotm_projeAdi="MPLAB-Proje" # Kurulum sırasında istenecek, boşluklar tirelerle değiştirilecek
+export urtotm_dialogBaslik="${urtotm_projeAdi} - Üretim Otomasyonu"
+export urtotm_projeUrtotmEnv="/disk/Projeler/Kabuk-Shell/uretim-otomasyonu/mplabx/test/.urtotm/urtotmenv"
+
+# export projeGoruntuArsivi="/disk/Projeler/Kabuk-Shell/uretim-otomasyonu/mplabx/test/yedekler/s1/1_0_0/mplab-proje.X-202312051358-v1.0.0-a89b2ee.zip"
+
+source etkilesim
+# echo "PATH $PATH"
+# echo "PWD $PWD"
+# mesajGoster bilgi "Yayınla Test" "Test başlıyor..."
+yayinla "v1.3.8"
+yayinla "v1.3.9"
+yayinla "v1.3.10"

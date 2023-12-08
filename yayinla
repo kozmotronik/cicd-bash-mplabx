@@ -1,0 +1,111 @@
+#!/bin/bash 
+# 
+# post-merge kancası tarafından çağrılması beklenir. Yayınlama betiğini çağıran kanca, yeni sürüm 
+# numarasıyla birlikte çağırmalıdır.
+# $1: Sürüm numarası
+
+# MPLABX için yayınlama işlemleri
+source etkilesim # Buradan yalnızca etkilesim işlevleri çağrıldığı için source etmek gerekiyor
+
+yayinlaBaslik="$urtotm_dialogBaslik - Yayınla"
+
+# Üretim dizinleri
+urunlerDizini="${urtotm_calismaDizini}/üretim/ürünler"
+surumlerDizini="${urtotm_calismaDizini}/üretim/sürümler"
+ensonSurumDizini="${urtotm_calismaDizini}/üretim/ensonsürüm"
+if [ ! -d "$urunlerDizini" ]; then
+    mkdir -p "$urunlerDizini" # ürünler dizini yoksa yarat
+fi
+
+if [ ! -d "$surumlerDizini" ]; then
+    mkdir -p "$surumlerDizini" # ürünler dizini yoksa yarat
+fi
+
+if [ ! -d "$ensonSurumDizini" ]; then
+    mkdir -p "$ensonSurumDizini" # ürünler dizini yoksa yarat
+fi
+
+# Doxygen belgelendirmesi üret
+if command -v doxygen &> /dev/null; then
+    doxyfile=$(find "$urtotm_calismaDizini" -type f -name Doxyfile | head -1)
+    if [[ -z "$doxyfile" ]]; then
+        # Doxyfile yok üretilsin mi?
+        if ! evetHayirGoster "$yayinlaBaslik" "Doxygen belgelendirmesi için bir yapılandırma dosyası bulunamadı, üretilsin mi?"
+        then
+            while [[ -z "$doxyfile" ]]; do
+                if doxyDizin=$(dizinAl "$yayinlaBaslik"); then
+                    doxyfile="$doxyDizin/Doxyfile"
+                    SURUM="$1" CIKTI="$ciktiDizini" doxygen -qg "$doxyfile" >& /dev/null
+                else
+                    mesajGoster uyari "$yayinlaBaslik" "Lütfen Doxygen belgelendirme yapılandırması için bir dizin seçiniz!"
+                fi
+            done
+        fi
+    else
+        doxyfile=$(realpath "$doxyfile")
+    #     belgelendirmeDizini="${doxyfile%/*}"
+        echo "Doxyfile: $doxyfile"
+        ciktiDizini="${surumlerDizini}/belgelendirme"
+        SURUM="$1" CIKTI="$ciktiDizini" doxygen -q "$doxyfile" >& /dev/null
+    fi
+    ciktiDizini=$(realpath "$ciktiDizini") # çıktının tam yolunu al
+else
+    mesajGoster uyari "$yayinlaBaslik" "Doxygen yüklü olmadığından belgelendirme üretilmeyecek!" &
+fi
+
+# Yayınlanan sürümler dizini
+# Yayınlama aşamasına gelmeden projenin ilgili sürümünün [urtotm_yedekDizini] içerisine görüntüsünün
+# alınmış olması beklenir. Normalde goruntu betiği bu değişkeni, diğer üretim otomasyonu 
+# betiklerine görünür olması için export eder. Ancak yine de yoklamak en iyisi.
+if [[ ! -e $projeGoruntuArsivi ]]; then
+# Bu kabuk oturumunda proje görüntü arşivi tanımlanmamış, burada sürüm numarasına göre ara.
+# Arama kriteri; dosyanın 30 dakika veya daha az bir süre içinde değiştirilmiş olması.
+# find Yedekler -type f -name "hkbmv2.X*v1.0.0*.zip" -mmin -30*
+    projeGoruntuArsivi=$(find "$urtotm_yedekDizini" -type f -name "${urtotm_projeAdi}*${1}*.zip" -mmin -10 | head -1)
+    echo "Proje görüntü arşivi bul: $projeGoruntuArsivi"
+    if [[ -z "$projeGoruntuArsivi" ]]; then
+        # Bulunan arşiv sürüm numarası içermiyor
+        mesajGoster hata "$yayinlaBaslik" "Yedek dizininde sürüm numarası içeren bir görüntü arşivi bulunamadı!"
+        exit 1
+    fi
+    projeGoruntuArsivi=$(realpath "$projeGoruntuArsivi") # tam yolu al
+    echo "Proje arşivi tam yolu: $projeGoruntuArsivi" 
+fi
+cp "$projeGoruntuArsivi" "$surumlerDizini"
+projeSurumArsivi="${projeGoruntuArsivi##*/}"
+echo "projeSurumArsivi $projeSurumArsivi"
+
+# projeGoruntuArsivi girdisini urtotm_projeUrtotmEnv dosyasından sil
+sed -i '/^export projeGoruntuArsivi*/d' "$urtotm_projeUrtotmEnv"
+
+# Doxygen belgelendirme çıktısı üretmişse, belgelendirmeyi de sürüm arşivine ekle
+if [[ -e "$ciktiDizini" ]]; then
+    pushd "$surumlerDizini" # bash stack :))
+    # Görüntü yedeğini zip olarak arşivle
+    # zip -[SEÇENEKLER] <ARŞİV_YOLU/ARŞİV_ADI> <DİZİN_YOLU/DİZİN_ADI>
+    # -q (quiet): Zip komutunun çıktılarını gösterme
+    # -m (move into archive): Zipledikten sonra dizini sil; dizin arşive taşınır
+    # -r (recursive): Dizin içerisindeki her şeyi arşive ekle
+    # -g (Grow): Var olan bir arşive ekle
+    if ! zip -qmrg "$projeSurumArsivi" "${ciktiDizini##*/}"; then
+        mesajGoster hata "$yayinlaBaslik" "İlgilenmeniz gerekiyor: $ciktiDizini arşivlenirken bir şeyler ters gitti." &
+    fi
+    popd
+fi
+
+# Ürün işlemleri
+urun=$(find "$urtotm_projeDizini" -type f -name '*.hex')
+if [[ -z "$urun" ]]; then
+    mesajGoster hata "$yayinlaBaslik" "Proje dizini içinde *.hex dosyası bulunamadığından işlem sürdürülemiyor"
+    exit 1
+fi
+
+# ensonsürüm dizninde ne varsa temizle ve son sürümü kopyala
+# ATTENTION '*' karakteri litreal içerisine alınırsa genişletilmez. Örneğin
+# rm -f "$ensonSurumDizini/*" kabuk tarafından bir literal karakter olarak tanınacak ve
+# genişletilmeyecektir. Dolayısıyla rm komutu '*' adında bir dosya bulamayacağından hiçbir şey
+# silmez. Bu nedenle '*' wildcard olarak kullanılmak isteniyorsa, tırnak içine alınmamalıdır.
+rm -f "$ensonSurumDizini/"*
+urunAdi="${urtotm_projeAdi}-${1}-$(date +"%Y%m%d%H%M%S").hex"
+# ürünü hem ürünler hem de ensonsürüm dizinlerine kopyala
+tee "${urunlerDizini}/${urunAdi}" "${ensonSurumDizini}/${urunAdi}" < "$urun" >& /dev/null
