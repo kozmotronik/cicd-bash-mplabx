@@ -1,0 +1,14 @@
+#!/bin/bash
+#
+# Kancalar için test
+
+source test-ilkle
+# pre-commit # ok - 2023-12-06 17:24
+# echo "pre-commit çıkış kodu: $?"
+# 
+# post-commit # ok - 2023-12-06 17:24
+
+# post-merge git komutları çalıştırdığı için proje dizininden çalıştırılmalı
+pushd "$urtotm_projeDizini" >& /dev/null
+post-merge # ok - 2023-12-06 17:24
+popd >& /dev/null
