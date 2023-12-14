@@ -1,5 +1,5 @@
 #!/bin/bash
-#
+source etkilesim
 
 precommitBaslik="$urtotm_dialogBaslik - pre-commit"
 if command -v tersara &> /dev/null; then

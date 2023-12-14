@@ -1,4 +1,5 @@
 #!/bin/bash
+source etkilesim
 
 postcommitBaslik="$urtotm_dialogBaslik - post-commit"
 if command -v goruntu >& /dev/null; then
