@@ -10,9 +10,9 @@ source etkilesim # Buradan yalnızca etkilesim işlevleri çağrıldığı için
 yayinlaBaslik="$urtotm_dialogBaslik - Yayınla"
 
 # Üretim dizinleri
-urunlerDizini="${urtotm_calismaDizini}/üretim/ürünler"
-surumlerDizini="${urtotm_calismaDizini}/üretim/sürümler"
-ensonSurumDizini="${urtotm_calismaDizini}/üretim/ensonsürüm"
+urunlerDizini="${urtotm_uretimDizini}/üretim/ürünler"
+surumlerDizini="${urtotm_uretimDizini}/üretim/sürümler"
+ensonSurumDizini="${urtotm_uretimDizini}/üretim/ensonsürüm"
 if [ ! -d "$urunlerDizini" ]; then
     mkdir -p "$urunlerDizini" # ürünler dizini yoksa yarat
 fi
@@ -27,7 +27,7 @@ fi
 
 # Doxygen belgelendirmesi üret
 if command -v doxygen &> /dev/null; then
-    doxyfile=$(find "$urtotm_calismaDizini" -type f -name Doxyfile | head -1)
+    doxyfile=$(find "$urtotm_uretimDizini" -type f -name Doxyfile | head -1)
     if [[ -z "$doxyfile" ]]; then
         # Doxyfile yok üretilsin mi?
         if ! evetHayirGoster "$yayinlaBaslik" "Doxygen belgelendirmesi için bir yapılandırma dosyası bulunamadı, üretilsin mi?"
