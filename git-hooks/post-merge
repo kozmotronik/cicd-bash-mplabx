@@ -48,7 +48,7 @@ if [[ $seciliDal == "main" ]] || [[ $seciliDal == "master" ]]; then
     # Sürüm görüntüsü al
     goruntu "$(basename -- "$0")"
     # Yeniden source edilmezse, 'projeGoruntuArsivi' görünür olmaz
-    source "$urtotm_projeUrtotmEnv"
+    source "$urtotm_projeUrtotmenv"
 
     # MPLABX ürün yayınlamasını yap
     yayinla "$surum"
