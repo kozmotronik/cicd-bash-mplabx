@@ -75,8 +75,8 @@ cp "$projeGoruntuArsivi" "$surumlerDizini"
 projeSurumArsivi="${projeGoruntuArsivi##*/}"
 echo "projeSurumArsivi $projeSurumArsivi"
 
-# projeGoruntuArsivi girdisini urtotm_projeUrtotmEnv dosyasından sil
-sed -i '/^export projeGoruntuArsivi*/d' "$urtotm_projeUrtotmEnv"
+# projeGoruntuArsivi girdisini urtotm_projeUrtotmenv dosyasından sil
+sed -i '/^export projeGoruntuArsivi*/d' "$urtotm_projeUrtotmenv"
 
 # Doxygen belgelendirme çıktısı üretmişse, belgelendirmeyi de sürüm arşivine ekle
 if [[ -e "$ciktiDizini" ]]; then
