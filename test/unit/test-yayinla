@@ -7,6 +7,5 @@ source test-ilkle
 # echo "PATH $PATH"
 # echo "PWD $PWD"
 # mesajGoster bilgi "Yayınla Test" "Test başlıyor..."
-yayinla "v1.3.8"
-yayinla "v1.3.9"
-yayinla "v1.3.10"
+goruntu post-merge
+yayinla "v1.3.14"
