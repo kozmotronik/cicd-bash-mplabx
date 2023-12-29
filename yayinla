@@ -25,7 +25,11 @@ if [ ! -d "$ensonSurumDizini" ]; then
     mkdir -p "$ensonSurumDizini" # ürünler dizini yoksa yarat
 fi
 
-# Doxygen belgelendirmesi üret
+# Doxygen belgelendirmesi üret.
+# ATTENTION (Dikkat) Doxyfile Doxygen yapılandırma dosyasında girdi hedefleri göreceli
+# verilmişse doxygen'in mutlaka Doxyfile dosyasının bulunduğu dizinden çalışması gerekir.
+# Aksi takdirde göreceli INPUT hedeflerini bulamaz ve eksik bir belgelendirme üretir.
+belgelendirmeCiktiDizini="${surumlerDizini}/belgelendirme"
 if command -v doxygen &> /dev/null; then
     doxyfile=$(find "$urtotm_uretimDizini" -type f -name Doxyfile | head -1)
     if [[ -z "$doxyfile" ]]; then
@@ -34,8 +38,11 @@ if command -v doxygen &> /dev/null; then
         then
             while [[ -z "$doxyfile" ]]; do
                 if doxyDizin=$(dizinAl "$yayinlaBaslik"); then
+                    doxyfileDizini="$doxyDizin"
                     doxyfile="$doxyDizin/Doxyfile"
-                    SURUM="$1" CIKTI="$ciktiDizini" doxygen -qg "$doxyfile" >& /dev/null
+                    pushd "$doxyfileDizini"
+                    SURUM="$1" CIKTI="$belgelendirmeCiktiDizini" doxygen -qg "$doxyfile" >& /dev/null
+                    popd
                 else
                     mesajGoster uyari "$yayinlaBaslik" "Lütfen Doxygen belgelendirme yapılandırması için bir dizin seçiniz!"
                 fi
@@ -43,12 +50,13 @@ if command -v doxygen &> /dev/null; then
         fi
     else
         doxyfile=$(realpath "$doxyfile")
-    #     belgelendirmeDizini="${doxyfile%/*}"
-        echo "Doxyfile: $doxyfile"
-        ciktiDizini="${surumlerDizini}/belgelendirme"
-        SURUM="$1" CIKTI="$ciktiDizini" doxygen -q "$doxyfile" >& /dev/null
+        doxyfileDizini="${doxyfile%/*}"
+        pushd "$doxyfileDizini"
+        SURUM="$1" CIKTI="$belgelendirmeCiktiDizini" doxygen -q "$doxyfile" >& /dev/null
+        popd
     fi
-    ciktiDizini=$(realpath "$ciktiDizini") # çıktının tam yolunu al
+    echo "Doxyfile: $doxyfile"
+    belgelendirmeCiktiDizini=$(realpath "$belgelendirmeCiktiDizini") # çıktının tam yolunu al
 else
     mesajGoster uyari "$yayinlaBaslik" "Doxygen yüklü olmadığından belgelendirme üretilmeyecek!" &
 fi
@@ -79,7 +87,7 @@ echo "projeSurumArsivi $projeSurumArsivi"
 sed -i '/^export projeGoruntuArsivi*/d' "$urtotm_projeUrtotmenv"
 
 # Doxygen belgelendirme çıktısı üretmişse, belgelendirmeyi de sürüm arşivine ekle
-if [[ -e "$ciktiDizini" ]]; then
+if [[ -e "$belgelendirmeCiktiDizini" ]]; then
     pushd "$surumlerDizini" # bash stack :))
     # Görüntü yedeğini zip olarak arşivle
     # zip -[SEÇENEKLER] <ARŞİV_YOLU/ARŞİV_ADI> <DİZİN_YOLU/DİZİN_ADI>
@@ -87,8 +95,8 @@ if [[ -e "$ciktiDizini" ]]; then
     # -m (move into archive): Zipledikten sonra dizini sil; dizin arşive taşınır
     # -r (recursive): Dizin içerisindeki her şeyi arşive ekle
     # -g (Grow): Var olan bir arşive ekle
-    if ! zip -qmrg "$projeSurumArsivi" "${ciktiDizini##*/}"; then
-        mesajGoster hata "$yayinlaBaslik" "İlgilenmeniz gerekiyor: $ciktiDizini arşivlenirken bir şeyler ters gitti." &
+    if ! zip -qmrg "$projeSurumArsivi" "${belgelendirmeCiktiDizini##*/}"; then
+        mesajGoster hata "$yayinlaBaslik" "İlgilenmeniz gerekiyor: $belgelendirmeCiktiDizini arşivlenirken bir şeyler ters gitti." &
     fi
     popd
 fi
