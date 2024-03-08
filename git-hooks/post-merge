@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 source etkilesim
 
 postmergeBaslik="$urtotm_dialogBaslik - post-merge"

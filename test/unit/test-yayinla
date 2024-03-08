@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # MPLABX yayınla için birim (unit) testi
 # export projeGoruntuArsivi="/disk/Projeler/UretimOtomasyonu/Bash/UretimOtomasyonu/mplabx/test/unit/yedekler/s1/1_0_0/mplab-proje.X-202312051358-v1.0.0-a89b2ee.zip"

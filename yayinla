@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/usr/bin/env bash
 # 
 # post-merge kancası tarafından çağrılması beklenir. Yayınlama betiğini çağıran kanca, yeni sürüm 
 # numarasıyla birlikte çağırmalıdır.
