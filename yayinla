@@ -10,9 +10,9 @@ source etkilesim # Buradan yalnızca etkilesim işlevleri çağrıldığı için
 yayinlaBaslik="$urtotm_dialogBaslik - Yayınla"
 
 # Üretim dizinleri
-urunlerDizini="${urtotm_uretimDizini}/üretim/ürünler"
-surumlerDizini="${urtotm_uretimDizini}/üretim/sürümler"
-ensonSurumDizini="${urtotm_uretimDizini}/üretim/ensonsürüm"
+urunlerDizini="${urtotm_projeCiktiDizini}/üretim/ürünler"
+surumlerDizini="${urtotm_projeCiktiDizini}/üretim/sürümler"
+ensonSurumDizini="${urtotm_projeCiktiDizini}/üretim/ensonsürüm"
 if [ ! -d "$urunlerDizini" ]; then
     mkdir -p "$urunlerDizini" # ürünler dizini yoksa yarat
 fi
@@ -31,7 +31,7 @@ fi
 # Aksi takdirde göreceli INPUT hedeflerini bulamaz ve eksik bir belgelendirme üretir.
 belgelendirmeCiktiDizini="${surumlerDizini}/belgelendirme"
 if command -v doxygen &> /dev/null; then
-    doxyfile=$(find "$urtotm_uretimDizini" -type f -name Doxyfile | head -1)
+    doxyfile=$(find "$urtotm_projeCiktiDizini" -type f -name Doxyfile | head -1)
     if [[ -z "$doxyfile" ]]; then
         # Doxyfile yok üretilsin mi?
         if ! evetHayirGoster "$yayinlaBaslik" "Doxygen belgelendirmesi için bir yapılandırma dosyası bulunamadı, üretilsin mi?"
@@ -62,14 +62,14 @@ else
 fi
 
 # Yayınlanan sürümler dizini
-# Yayınlama aşamasına gelmeden projenin ilgili sürümünün [urtotm_yedekDizini] içerisine görüntüsünün
+# Yayınlama aşamasına gelmeden projenin ilgili sürümünün [urtotm_projeYedeklemeDizini] içerisine görüntüsünün
 # alınmış olması beklenir. Normalde goruntu betiği bu değişkeni, diğer üretim otomasyonu 
 # betiklerine görünür olması için export eder. Ancak yine de yoklamak en iyisi.
 if [[ ! -e $projeGoruntuArsivi ]]; then
 # Bu kabuk oturumunda proje görüntü arşivi tanımlanmamış, burada sürüm numarasına göre ara.
 # Arama kriteri; dosyanın 30 dakika veya daha az bir süre içinde değiştirilmiş olması.
 # find Yedekler -type f -name "hkbmv2.X*v1.0.0*.zip" -mmin -30*
-    projeGoruntuArsivi=$(find "$urtotm_yedekDizini" -type f -name "${urtotm_projeAdi}*${1}*.zip" -mmin -10 | head -1)
+    projeGoruntuArsivi=$(find "$urtotm_projeYedeklemeDizini" -type f -name "${urtotm_projeAdi}*${1}*.zip" -mmin -10 | head -1)
     echo "Proje görüntü arşivi bul: $projeGoruntuArsivi"
     if [[ -z "$projeGoruntuArsivi" ]]; then
         # Bulunan arşiv sürüm numarası içermiyor
