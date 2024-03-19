@@ -12,9 +12,9 @@ urtotm_projeAdi="TestUnit-MPLABX-Proje"
 # Yoksa, urtotm_projeUrtotmEnv yapılandırma dosyasını oluştur
 cat <<- SON > "$urtotm_projeUrtotmEnv"
 export PATH+=$path
-export urtotm_uretimDizini=/disk/Projeler/UretimOtomasyonu/Bash/UretimOtomasyonu/mplabx/test/unit/test-proje
+export urtotm_projeCiktiDizini=/disk/Projeler/UretimOtomasyonu/Bash/UretimOtomasyonu/mplabx/test/unit/test-proje
 export urtotm_projeDizini=/disk/Projeler/UretimOtomasyonu/Bash/UretimOtomasyonu/mplabx/test/unit/test-proje/mplab-proje.X
-export urtotm_yedekDizini=/disk/Projeler/UretimOtomasyonu/Bash/UretimOtomasyonu/mplabx/test/unit/test-proje/yedekler
+export urtotm_projeYedeklemeDizini=/disk/Projeler/UretimOtomasyonu/Bash/UretimOtomasyonu/mplabx/test/unit/test-proje/yedekler
 export urtotm_projeAdi=Test-MPLAB-Proje
 export urtotm_dialogBaslik="$urtotm_projeAdi - urtotm"
 export urtotm_projeUrtotmEnv=$urtotm_projeUrtotmEnv
