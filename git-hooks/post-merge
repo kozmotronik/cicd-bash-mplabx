@@ -2,47 +2,34 @@
 source etkilesim
 
 postmergeBaslik="$urtotm_dialogBaslik - post-merge"
-tagBilgileriniAl() {
-    # Tag bilgileri tam ve düzgün girilene dek bilgileri yeniden iste
-    while true; do
-        surum=$(girdiAl "$postmergeBaslik" "Sürüm numarası giriniz (zorunlu).\nSürüm formatı: vX.Y.Z, X: Major, Y: Minor, Z: Yama.")
-        mesaj=$(girdiAl "$postmergeBaslik" "Yeni sürüm numarası için bir mesaj giriniz (seçeneksel).")
-        if [[ -z "$mesaj" ]]; then
-            mesaj="$surum sürümüne yükselt."
-        fi
-        echo "$surum - $mesaj"
-        # Girilen sürüm biçimini yokla; format vX.Y.Z, X: Major, Y: Minor, Z: Yama
-        [[ "$surum" =~ ^v[[:digit:]]\.[[:digit:]]\.[[:digit:]] ]]
-#         echo "BASH_REMATCH: ${BASH_REMATCH[0]}"
-        if [[ -n ${BASH_REMATCH[0]} ]] && [[ -n $mesaj ]]; then
-            # Girilen sürümün zaten önceden girilmiş olmadığını doğrula
-            if git tag | grep -E "$surum" &> /dev/null; then
-                echo "$surum sürümü zaten var."
-            else
-                break
-            fi
-        fi
-    done
-}
 
+islemSurdurulemiyor="işlem sürdürülemiyor"
 if ! command -v girdiAl >& /dev/null; then
-    echo -e "$postmergeBaslik\nEtkileşim betiğine ulaşılamadığından işlem sürdürülemiyor."
+    echo -e "$postmergeBaslik\n'etkilesim' betiği '$PATH' yollarında bulunamadığından $islemSurdurulemiyor."
     exit 1
 fi
 if ! command -v goruntu >& /dev/null; then
-    mesajGoster hata "$postmergeBaslik" "'tersara' betiği '$PATH' yollarında bulunamadığından post-merge kancası iptal oldu." &
+    mesajGoster hata "$postmergeBaslik" "'goruntu' betiği '$PATH' yollarında bulunamadığından $islemSurdurulemiyor." &
     exit 1
 fi
 if ! git status; then
-    mesajGoster hata "$postmergeBaslik" "$PWD dizininde bir git reposu bulunmadığından post-merge kancası iptal oldu." &
+    mesajGoster hata "$postmergeBaslik" "$PWD dizini bir git reposu olmadığından $islemSurdurulemiyor." &
     exit 1
 fi
 
 seciliDal=$(git branch --show-current)
 echo "$seciliDal" dalı seçili.
 if [[ $seciliDal == "main" ]] || [[ $seciliDal == "master" ]]; then
-    tagBilgileriniAl
-#     echo "İşlev dönüşü: sürüm '$surum', mesaj '$mesaj'"
+    temp=$((mktemp) 2>/dev/null) || temp=/tmp/temp$$
+    trap "rm -f $temp" 0 $SIG_NONE $SIG_HUP $SIG_INT $SIG_QUIT $SIG_TERM
+
+    if ! surumal "$temp"; then
+        mesajGoster hata "$postmergeBaslik" "Yeni sürüm bilgilerini alma işlemi sırasında bir hata olduğundan $islemSurdurulemiyor." &
+        exit 1
+    fi
+    girdi=$(head -1 "$temp") # surumal girdileri [sürüm],[sürüm mesajı] biçiminde verir
+    surum=$(echo $girdi | awk -F, '{print $1}')
+    mesaj=$(echo $girdi | awk -F, '{print $2}')
     # Üretim dalını yeni sürüm verisi ile tagla
     git tag -a "$surum" -m "$mesaj"
     # Sürüm görüntüsü al
